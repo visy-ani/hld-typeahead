@@ -137,7 +137,7 @@ def build_html(student: str, repo: str, chash: str) -> str:
 
 def main() -> int:
     student = sys.argv[1] if len(sys.argv) > 1 else "Anish Yadav"
-    repo = sys.argv[2] if len(sys.argv) > 2 else ""
+    repo = sys.argv[2] if len(sys.argv) > 2 else "https://github.com/visy-ani/hld-typeahead"
     chash = commit_hash()
     html = build_html(student, repo, chash)
 
