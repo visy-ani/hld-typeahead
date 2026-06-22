@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Search Typeahead</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="stylesheet" href="/static/style.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔎</text></svg>" />
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="brand">
+        <span class="logo">⌕</span>
+        <div>
+          <h1>Search Typeahead</h1>
+          <p class="tagline">Prefix suggestions · consistent-hashed cache · recency-aware trending · batched writes</p>
+        </div>
+      </div>
+      <nav class="links">
+        <a href="/docs" target="_blank" rel="noopener">API docs</a>
+        <a href="/metrics" target="_blank" rel="noopener">/metrics</a>
+        <a href="/ring" target="_blank" rel="noopener">/ring</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="search-panel">
+        <div class="mode-toggle" role="radiogroup" aria-label="Ranking mode">
+          <button class="mode-btn active" data-mode="basic" role="radio" aria-checked="true">
+            Basic <span class="mode-sub">all-time count</span>
+          </button>
+          <button class="mode-btn" data-mode="trending" role="radio" aria-checked="false">
+            Trending <span class="mode-sub">recency-aware</span>
+          </button>
+        </div>
+
+        <div class="searchbox" id="searchbox">
+          <span class="search-icon" aria-hidden="true">⌕</span>
+          <input
+            id="search-input"
+            type="text"
+            autocomplete="off"
+            spellcheck="false"
+            placeholder="Start typing… (try: java, london, high s, new y, data)"
+            aria-label="Search"
+            aria-autocomplete="list"
+            aria-controls="suggestions"
+            aria-expanded="false"
+          />
+          <button id="search-btn" class="search-submit">Search</button>
+          <ul id="suggestions" class="suggestions" role="listbox" aria-label="Suggestions" hidden></ul>
+        </div>
+
+        <div class="request-strip" id="request-strip" aria-live="polite">
+          <span class="chip" id="chip-cache"
+            title="Suggestion cache (consistent-hash routed). HIT = served from cache; MISS = recomputed from the trie and cached. A cached prefix is invalidated when a matching query is searched (so the new count shows up), or after the 30s TTL — so re-typing a query you just searched is expected to MISS.">cache —</span>
+          <span class="chip" id="chip-node"
+            title="Which logical cache node owns this prefix, chosen by the consistent-hash ring. See GET /cache/debug.">node —</span>
+          <span class="chip" id="chip-latency"
+            title="Server-side time to build this /suggest response (cache lookup → trie → rank).">latency —</span>
+          <span class="chip" id="chip-count"
+            title="Number of suggestions returned for this prefix (≤ the requested limit).">results —</span>
+        </div>
+
+        <div class="result-card" id="result-card" hidden>
+          <div class="result-head">
+            <span class="result-title">Search response</span>
+            <span class="result-query" id="result-query"></span>
+          </div>
+          <pre id="result-json" class="result-json"></pre>
+        </div>
+      </section>
+
+      <aside class="side">
+        <section class="trending">
+          <div class="side-head">
+            <h2>🔥 Trending now</h2>
+            <button id="refresh-trending" class="ghost-btn" title="Refresh trending">↻</button>
+          </div>
+          <p class="side-hint">Updates as searches are submitted (recency-decayed).</p>
+          <ol id="trending-list" class="trending-list">
+            <li class="empty">No searches yet — submit a few to see trends.</li>
+          </ol>
+        </section>
+
+        <section class="metrics-card">
+          <div class="side-head"><h2>📊 Live metrics</h2>
+            <button id="refresh-metrics" class="ghost-btn" title="Refresh metrics">↻</button>
+          </div>
+          <dl class="metrics-grid" id="metrics-grid">
+            <div><dt>p95 latency</dt><dd id="m-p95">—</dd></div>
+            <div><dt>cache hit rate</dt><dd id="m-hit">—</dd></div>
+            <div><dt>suggest reqs</dt><dd id="m-sreq">—</dd></div>
+            <div><dt>searches</dt><dd id="m-search">—</dd></div>
+            <div><dt>DB upserts</dt><dd id="m-writes">—</dd></div>
+            <div><dt>write reduction</dt><dd id="m-reduce">—</dd></div>
+          </dl>
+        </section>
+      </aside>
+    </main>
+
+    <footer>
+      <span id="status-line">Ready.</span>
+    </footer>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
